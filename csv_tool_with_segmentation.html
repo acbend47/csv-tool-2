@@ -1,0 +1,1990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Comparison & Customer Segmentation Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            background: white;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: #f8f9fa;
+        }
+
+        .upload-area.dragover {
+            background: #e7e9fc;
+            border-color: #764ba2;
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .file-list {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .file-stats {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .remove-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .remove-btn:hover {
+            background: #c82333;
+        }
+
+        .mode-selection {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .mode-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #e9ecef;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .mode-card:hover {
+            border-color: #667eea;
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.2);
+        }
+
+        .mode-card.selected {
+            border-color: #667eea;
+            background: #f0f2ff;
+        }
+
+        .mode-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .mode-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .mode-description {
+            font-size: 14px;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .comparison-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .option-group {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .option-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="text"]:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            margin-top: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .results-summary {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .summary-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .results-table {
+            overflow-x: auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .group-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0 15px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .group-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .group-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        .segment-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .segment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .segment-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .segment-count {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .segment-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .segment-stat {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+        }
+
+        .segment-stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .segment-stat-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .help-text {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 CSV Comparison & Customer Segmentation Tool</h1>
+            <p>Upload CSV files to compare data, extract information, or analyze customer segments</p>
+        </div>
+
+        <div class="content">
+            <!-- Step 1: Upload Files -->
+            <div class="section">
+                <div class="section-title">📁 Step 1: Upload CSV Files</div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <h3>Click or drag files here to upload</h3>
+                    <p style="margin-top: 10px; color: #6c757d;">Support for multiple CSV files</p>
+                    <input type="file" id="fileInput" accept=".csv" multiple>
+                    <button class="btn btn-primary" style="margin-top: 20px;" onclick="document.getElementById('fileInput').click()">
+                        Select Files
+                    </button>
+                </div>
+                <div class="file-list" id="fileList"></div>
+            </div>
+
+            <!-- Step 2: Select Mode -->
+            <div class="section hidden" id="modeSection">
+                <div class="section-title">🎯 Step 2: Select Analysis Mode</div>
+                <div class="mode-selection">
+                    <div class="mode-card" data-mode="comparison" onclick="selectMode('comparison')">
+                        <div class="mode-icon">🔄</div>
+                        <div class="mode-title">File Comparison</div>
+                        <div class="mode-description">Find matching or unique records across multiple files</div>
+                    </div>
+                    <div class="mode-card" data-mode="extraction" onclick="selectMode('extraction')">
+                        <div class="mode-icon">🔍</div>
+                        <div class="mode-title">Data Extraction</div>
+                        <div class="mode-description">Extract specific records based on criteria from one file</div>
+                    </div>
+                    <div class="mode-card" data-mode="crossref" onclick="selectMode('crossref')">
+                        <div class="mode-icon">🔗</div>
+                        <div class="mode-title">Cross-Reference</div>
+                        <div class="mode-description">Find duplicate values or group related records</div>
+                    </div>
+                    <div class="mode-card" data-mode="segmentation" onclick="selectMode('segmentation')">
+                        <div class="mode-icon">👥</div>
+                        <div class="mode-title">Customer Segmentation</div>
+                        <div class="mode-description">Analyze customer behavior and create segments based on purchase patterns</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comparison Options -->
+            <div class="section hidden" id="optionsSection">
+                <div class="section-title">⚙️ Step 3: Configure Comparison</div>
+                <div class="comparison-options">
+                    <div class="option-group">
+                        <label>Match Column</label>
+                        <select id="matchColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label>Comparison Type</label>
+                        <select id="comparisonType">
+                            <option value="in_both">Records in Both Files</option>
+                            <option value="in_first_only">Records Only in First File</option>
+                            <option value="in_second_only">Records Only in Second File</option>
+                            <option value="all_with_match">All Records (Mark Matches)</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="performComparison()">
+                        🚀 Run Comparison
+                    </button>
+                </div>
+            </div>
+
+            <!-- Extraction Options -->
+            <div class="section hidden" id="extractionSection">
+                <div class="section-title">⚙️ Step 3: Configure Extraction</div>
+                <div class="comparison-options">
+                    <div class="option-group">
+                        <label>Filter Column</label>
+                        <select id="filterColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label>Filter Type</label>
+                        <select id="filterType">
+                            <option value="contains">Contains</option>
+                            <option value="equals">Equals</option>
+                            <option value="starts_with">Starts With</option>
+                            <option value="ends_with">Ends With</option>
+                            <option value="not_contains">Does Not Contain</option>
+                            <option value="not_equals">Does Not Equal</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label>Filter Value</label>
+                        <input type="text" id="filterValue" placeholder="Enter value to filter">
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="performExtraction()">
+                        🚀 Run Extraction
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cross-Reference Options -->
+            <div class="section hidden" id="crossrefSection">
+                <div class="section-title">⚙️ Step 3: Configure Cross-Reference</div>
+                <div class="comparison-options">
+                    <div class="option-group">
+                        <label>Query Type</label>
+                        <select id="queryType" onchange="updateCrossrefOptions()">
+                            <option value="same_value">Records with Same Value</option>
+                            <option value="grouped_by">Group Records By Column</option>
+                            <option value="duplicate_values">Find Duplicate Values</option>
+                            <option value="related_records">Find Related Records</option>
+                        </select>
+                    </div>
+                    <div class="option-group">
+                        <label>Group By Column</label>
+                        <select id="groupByColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                    </div>
+                    <div class="option-group" id="relatedColumnsGroup">
+                        <label>Show Related Columns</label>
+                        <div id="relatedColumnsCheckboxes" class="checkbox-group"></div>
+                    </div>
+                    <div class="option-group" id="additionalMatchGroup" class="hidden">
+                        <label>Additional Match Columns</label>
+                        <div id="additionalMatchCheckboxes" class="checkbox-group"></div>
+                        <small class="help-text">Select columns that must also match for records to be grouped together</small>
+                    </div>
+                    <div class="option-group">
+                        <label>Minimum Group Size</label>
+                        <input type="number" id="minGroupSize" value="2" min="1">
+                        <small class="help-text">Only show groups with at least this many records</small>
+                    </div>
+                    <div class="option-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="sortByGroupSize" checked>
+                            <label for="sortByGroupSize">Sort by Group Size (Largest First)</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" id="showGroupSummary">
+                            <label for="showGroupSummary">Show Grouped View</label>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="performCrossReference()">
+                        🚀 Run Cross-Reference
+                    </button>
+                </div>
+            </div>
+
+            <!-- Customer Segmentation Options -->
+            <div class="section hidden" id="segmentationSection">
+                <div class="section-title">⚙️ Step 3: Configure Customer Segmentation</div>
+                <div class="comparison-options">
+                    <div class="option-group">
+                        <label>Customer ID Column <span style="color: #dc3545;">*</span></label>
+                        <select id="customerIdColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                        <small class="help-text">Unique identifier for each customer (Required)</small>
+                    </div>
+                    <div class="option-group">
+                        <label>Order Value/Amount Column</label>
+                        <select id="orderValueColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                        <small class="help-text">Column containing purchase amounts (Required for behavior-based segmentation)</small>
+                    </div>
+                    <div class="option-group">
+                        <label>Order Date Column</label>
+                        <select id="orderDateColumn">
+                            <option value="">-- Select Column --</option>
+                        </select>
+                        <small class="help-text">Column containing order dates (Required for behavior-based segmentation)</small>
+                    </div>
+                    <div class="option-group">
+                        <label>Product Column</label>
+                        <select id="productColumn">
+                            <option value="">-- None --</option>
+                        </select>
+                        <small class="help-text">Column containing product names or IDs (Required for product-based segmentation)</small>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 20px; background: white; border-radius: 8px;">
+                    <h4 style="margin-bottom: 15px;">Product-Based Segmentation (Optional)</h4>
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="enableProductSegmentation" onchange="toggleProductSegmentation()">
+                            Enable Product-Based Segmentation
+                        </label>
+                        <small class="help-text">Create segments based on specific products purchased</small>
+                    </div>
+                    <div id="productSegmentationOptions" class="hidden" style="margin-top: 15px;">
+                        <div class="option-group">
+                            <label>Product Titles (one per line) <span style="color: #dc3545;">*</span></label>
+                            <textarea id="productTitles" rows="5" style="width: 100%; padding: 10px; border: 2px solid #e9ecef; border-radius: 6px; font-size: 14px; font-family: inherit;" placeholder="Enter product titles, one per line&#10;Example:&#10;iPhone 15&#10;MacBook Pro&#10;AirPods Pro"></textarea>
+                            <small class="help-text">Enter exact or partial product names. Matching is case-insensitive.</small>
+                        </div>
+                        <div class="option-group">
+                            <label>Match Type</label>
+                            <select id="productMatchType">
+                                <option value="contains">Contains (partial match)</option>
+                                <option value="exact">Exact match</option>
+                                <option value="starts_with">Starts with</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 20px; background: white; border-radius: 8px;">
+                    <h4 style="margin-bottom: 15px;">Behavior-Based Segmentation Criteria (Optional)</h4>
+                    <small style="color: #6c757d; display: block; margin-bottom: 15px;">These criteria are only used when product-based segmentation is disabled</small>
+                    <div class="comparison-options">
+                        <div class="option-group">
+                            <label>High-Value Threshold ($)</label>
+                            <input type="number" id="highValueThreshold" value="1000" min="0" step="100">
+                            <small class="help-text">Total spending to be considered high-value</small>
+                        </div>
+                        <div class="option-group">
+                            <label>Frequent Buyer Threshold (orders)</label>
+                            <input type="number" id="frequentBuyerThreshold" value="5" min="1">
+                            <small class="help-text">Minimum orders to be frequent buyer</small>
+                        </div>
+                        <div class="option-group">
+                            <label>New Customer Period (days)</label>
+                            <input type="number" id="newCustomerDays" value="90" min="1">
+                            <small class="help-text">Days since first order to be "new"</small>
+                        </div>
+                        <div class="option-group">
+                            <label>At-Risk Period (days)</label>
+                            <input type="number" id="atRiskDays" value="180" min="1">
+                            <small class="help-text">Days since last order to be "at-risk"</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-primary" onclick="performSegmentation()">
+                        🚀 Analyze Customer Segments
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="section hidden" id="resultsSection"></div>
+        </div>
+    </div>
+
+    <script>
+        let uploadedFiles = [];
+        let parsedData = [];
+        let comparisonResults = [];
+        let currentMode = null;
+        let headerMappings = {};
+
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileList = document.getElementById('fileList');
+
+        // File upload handling
+        uploadArea.addEventListener('click', () => {
+            if (event.target === uploadArea || event.target.closest('.upload-area')) {
+                fileInput.click();
+            }
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = Array.from(e.dataTransfer.files).filter(f => f.name.endsWith('.csv'));
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(Array.from(e.target.files));
+        });
+
+        function handleFiles(files) {
+            files.forEach(file => {
+                if (uploadedFiles.find(f => f.name === file.name)) {
+                    alert(`File "${file.name}" is already uploaded.`);
+                    return;
+                }
+
+                uploadedFiles.push(file);
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    const csv = e.target.result;
+                    const data = parseCSV(csv);
+                    parsedData.push({
+                        fileName: file.name,
+                        headers: data.headers,
+                        rows: data.rows
+                    });
+                    
+                    updateFileList();
+                    document.getElementById('modeSection').classList.remove('hidden');
+                };
+                
+                reader.readAsText(file);
+            });
+        }
+
+        function parseCSV(csv) {
+            const lines = csv.split('\n').filter(line => line.trim());
+            if (lines.length === 0) return { headers: [], rows: [] };
+
+            const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+            const rows = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = parseCSVLine(lines[i]);
+                if (values.length === headers.length) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index];
+                    });
+                    rows.push(row);
+                }
+            }
+
+            return { headers, rows };
+        }
+
+        function parseCSVLine(line) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+
+            for (let i = 0; i < line.length; i++) {
+                const char = line[i];
+                
+                if (char === '"') {
+                    if (inQuotes && line[i + 1] === '"') {
+                        current += '"';
+                        i++;
+                    } else {
+                        inQuotes = !inQuotes;
+                    }
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result.map(v => v.replace(/^["']|["']$/g, ''));
+        }
+
+        function updateFileList() {
+            fileList.innerHTML = '';
+            parsedData.forEach((data, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-info">
+                        <div class="file-name">📄 ${data.fileName}</div>
+                        <div class="file-stats">
+                            ${data.rows.length.toLocaleString()} rows × ${data.headers.length} columns
+                        </div>
+                    </div>
+                    <button class="remove-btn" onclick="removeFile(${index})">Remove</button>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        function removeFile(index) {
+            uploadedFiles.splice(index, 1);
+            parsedData.splice(index, 1);
+            updateFileList();
+            
+            if (parsedData.length === 0) {
+                document.getElementById('modeSection').classList.add('hidden');
+                document.getElementById('optionsSection').classList.add('hidden');
+                document.getElementById('extractionSection').classList.add('hidden');
+                document.getElementById('crossrefSection').classList.add('hidden');
+                document.getElementById('segmentationSection').classList.add('hidden');
+                document.getElementById('resultsSection').classList.add('hidden');
+                currentMode = null;
+            }
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            document.querySelectorAll('.mode-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.querySelector(`[data-mode="${mode}"]`).classList.add('selected');
+
+            document.getElementById('optionsSection').classList.add('hidden');
+            document.getElementById('extractionSection').classList.add('hidden');
+            document.getElementById('crossrefSection').classList.add('hidden');
+            document.getElementById('segmentationSection').classList.add('hidden');
+            document.getElementById('resultsSection').classList.add('hidden');
+
+            if (mode === 'comparison') {
+                if (parsedData.length < 2) {
+                    alert('Please upload at least 2 CSV files for comparison.');
+                    return;
+                }
+                populateColumnDropdowns('matchColumn');
+                document.getElementById('optionsSection').classList.remove('hidden');
+            } else if (mode === 'extraction') {
+                if (parsedData.length === 0) {
+                    alert('Please upload at least 1 CSV file for extraction.');
+                    return;
+                }
+                populateColumnDropdowns('filterColumn');
+                document.getElementById('extractionSection').classList.remove('hidden');
+            } else if (mode === 'crossref') {
+                if (parsedData.length === 0) {
+                    alert('Please upload at least 1 CSV file.');
+                    return;
+                }
+                populateCrossrefColumns();
+                document.getElementById('crossrefSection').classList.remove('hidden');
+            } else if (mode === 'segmentation') {
+                if (parsedData.length === 0) {
+                    alert('Please upload at least 1 CSV file with customer order data.');
+                    return;
+                }
+                populateSegmentationColumns();
+                document.getElementById('segmentationSection').classList.remove('hidden');
+            }
+        }
+
+        function populateColumnDropdowns(selectId) {
+            const allHeaders = new Set();
+            parsedData.forEach(data => {
+                data.headers.forEach(header => allHeaders.add(header));
+            });
+
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">-- Select Column --</option>';
+            
+            Array.from(allHeaders).sort().forEach(header => {
+                const option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                select.appendChild(option);
+            });
+        }
+
+        function populateCrossrefColumns() {
+            const allHeaders = new Set();
+            parsedData.forEach(data => {
+                data.headers.forEach(header => allHeaders.add(header));
+            });
+
+            const groupBySelect = document.getElementById('groupByColumn');
+            groupBySelect.innerHTML = '<option value="">-- Select Column --</option>';
+            
+            const sortedHeaders = Array.from(allHeaders).sort();
+            sortedHeaders.forEach(header => {
+                const option = document.createElement('option');
+                option.value = header;
+                option.textContent = header;
+                groupBySelect.appendChild(option);
+            });
+
+            const relatedCheckboxes = document.getElementById('relatedColumnsCheckboxes');
+            const additionalMatchCheckboxes = document.getElementById('additionalMatchCheckboxes');
+            relatedCheckboxes.innerHTML = '';
+            additionalMatchCheckboxes.innerHTML = '';
+            
+            sortedHeaders.forEach(header => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'checkbox-item';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="related_${header}" value="${header}" checked>
+                    <label for="related_${header}">${header}</label>
+                `;
+                relatedCheckboxes.appendChild(checkboxDiv);
+
+                const matchCheckboxDiv = document.createElement('div');
+                matchCheckboxDiv.className = 'checkbox-item';
+                matchCheckboxDiv.innerHTML = `
+                    <input type="checkbox" id="match_${header}" value="${header}">
+                    <label for="match_${header}">${header}</label>
+                `;
+                additionalMatchCheckboxes.appendChild(matchCheckboxDiv);
+            });
+        }
+
+        function populateSegmentationColumns() {
+            const allHeaders = new Set();
+            parsedData.forEach(data => {
+                data.headers.forEach(header => allHeaders.add(header));
+            });
+
+            const sortedHeaders = Array.from(allHeaders).sort();
+            const selects = ['customerIdColumn', 'orderValueColumn', 'orderDateColumn', 'productColumn'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (selectId === 'productColumn') {
+                    select.innerHTML = '<option value="">-- None --</option>';
+                } else {
+                    select.innerHTML = '<option value="">-- Select Column --</option>';
+                }
+                
+                sortedHeaders.forEach(header => {
+                    const option = document.createElement('option');
+                    option.value = header;
+                    option.textContent = header;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        function updateCrossrefOptions() {
+            const queryType = document.getElementById('queryType').value;
+            const additionalMatchGroup = document.getElementById('additionalMatchGroup');
+            
+            if (queryType === 'related_records') {
+                additionalMatchGroup.classList.remove('hidden');
+            } else {
+                additionalMatchGroup.classList.add('hidden');
+            }
+        }
+
+        function toggleProductSegmentation() {
+            const enabled = document.getElementById('enableProductSegmentation').checked;
+            const options = document.getElementById('productSegmentationOptions');
+            
+            if (enabled) {
+                options.classList.remove('hidden');
+            } else {
+                options.classList.add('hidden');
+            }
+        }
+
+        function performComparison() {
+            const matchColumn = document.getElementById('matchColumn').value;
+            const comparisonType = document.getElementById('comparisonType').value;
+
+            if (!matchColumn) {
+                alert('Please select a match column.');
+                return;
+            }
+
+            if (parsedData.length < 2) {
+                alert('Need at least 2 files for comparison.');
+                return;
+            }
+
+            const file1 = parsedData[0];
+            const file2 = parsedData[1];
+
+            const set1 = new Map();
+            const set2 = new Map();
+
+            file1.rows.forEach(row => {
+                const key = (row[matchColumn] || '').toString().toLowerCase().trim();
+                if (key) {
+                    if (!set1.has(key)) set1.set(key, []);
+                    set1.get(key).push(row);
+                }
+            });
+
+            file2.rows.forEach(row => {
+                const key = (row[matchColumn] || '').toString().toLowerCase().trim();
+                if (key) {
+                    if (!set2.has(key)) set2.set(key, []);
+                    set2.get(key).push(row);
+                }
+            });
+
+            comparisonResults = [];
+
+            if (comparisonType === 'in_both') {
+                set1.forEach((rows, key) => {
+                    if (set2.has(key)) {
+                        rows.forEach(row => {
+                            comparisonResults.push({ ...row, __source: file1.fileName });
+                        });
+                        set2.get(key).forEach(row => {
+                            comparisonResults.push({ ...row, __source: file2.fileName });
+                        });
+                    }
+                });
+            } else if (comparisonType === 'in_first_only') {
+                set1.forEach((rows, key) => {
+                    if (!set2.has(key)) {
+                        rows.forEach(row => {
+                            comparisonResults.push({ ...row, __source: file1.fileName });
+                        });
+                    }
+                });
+            } else if (comparisonType === 'in_second_only') {
+                set2.forEach((rows, key) => {
+                    if (!set1.has(key)) {
+                        rows.forEach(row => {
+                            comparisonResults.push({ ...row, __source: file2.fileName });
+                        });
+                    }
+                });
+            } else if (comparisonType === 'all_with_match') {
+                file1.rows.forEach(row => {
+                    const key = (row[matchColumn] || '').toString().toLowerCase().trim();
+                    const inBoth = key && set2.has(key);
+                    comparisonResults.push({ ...row, __source: file1.fileName, __match_status: inBoth ? 'In Both' : 'Only in First' });
+                });
+                file2.rows.forEach(row => {
+                    const key = (row[matchColumn] || '').toString().toLowerCase().trim();
+                    const inBoth = key && set1.has(key);
+                    comparisonResults.push({ ...row, __source: file2.fileName, __match_status: inBoth ? 'In Both' : 'Only in Second' });
+                });
+            }
+
+            displayResults(comparisonType, matchColumn);
+        }
+
+        function performExtraction() {
+            const filterColumn = document.getElementById('filterColumn').value;
+            const filterType = document.getElementById('filterType').value;
+            const filterValue = document.getElementById('filterValue').value.toLowerCase();
+
+            if (!filterColumn || !filterValue) {
+                alert('Please select a filter column and enter a filter value.');
+                return;
+            }
+
+            comparisonResults = [];
+
+            parsedData.forEach(fileData => {
+                fileData.rows.forEach(row => {
+                    const cellValue = (row[filterColumn] || '').toString().toLowerCase();
+                    let matches = false;
+
+                    switch (filterType) {
+                        case 'contains':
+                            matches = cellValue.includes(filterValue);
+                            break;
+                        case 'equals':
+                            matches = cellValue === filterValue;
+                            break;
+                        case 'starts_with':
+                            matches = cellValue.startsWith(filterValue);
+                            break;
+                        case 'ends_with':
+                            matches = cellValue.endsWith(filterValue);
+                            break;
+                        case 'not_contains':
+                            matches = !cellValue.includes(filterValue);
+                            break;
+                        case 'not_equals':
+                            matches = cellValue !== filterValue;
+                            break;
+                    }
+
+                    if (matches) {
+                        comparisonResults.push({ ...row, __source: fileData.fileName });
+                    }
+                });
+            });
+
+            displayExtractionResults(filterColumn, filterType, filterValue);
+        }
+
+        function performCrossReference() {
+            const queryType = document.getElementById('queryType').value;
+            const groupByColumn = document.getElementById('groupByColumn').value;
+            const minGroupSize = parseInt(document.getElementById('minGroupSize').value) || 2;
+            const sortByGroupSize = document.getElementById('sortByGroupSize').checked;
+            const showGroupSummary = document.getElementById('showGroupSummary').checked;
+
+            if (!groupByColumn) {
+                alert('Please select a column to group by.');
+                return;
+            }
+
+            const relatedCheckboxes = document.querySelectorAll('#relatedColumnsCheckboxes input[type="checkbox"]:checked');
+            const relatedColumns = Array.from(relatedCheckboxes).map(cb => cb.value);
+
+            const additionalMatchCheckboxes = document.querySelectorAll('#additionalMatchCheckboxes input[type="checkbox"]:checked');
+            const additionalMatchColumns = Array.from(additionalMatchCheckboxes).map(cb => cb.value);
+
+            const selectedFiles = parsedData.length > 0 ? parsedData : [];
+            
+            let allRows = [];
+            selectedFiles.forEach(fileData => {
+                fileData.rows.forEach(row => {
+                    allRows.push({ ...row, __source: fileData.fileName });
+                });
+            });
+
+            const groups = new Map();
+
+            allRows.forEach(row => {
+                const groupValue = (row[groupByColumn] || '').toString().trim();
+                if (!groupValue) return;
+
+                let matchKey = groupValue.toLowerCase();
+                
+                if (queryType === 'related_records' && additionalMatchColumns.length > 0) {
+                    const additionalValues = additionalMatchColumns.map(col => 
+                        (row[col] || '').toString().trim().toLowerCase()
+                    ).join('|||');
+                    matchKey = groupValue.toLowerCase() + '|||' + additionalValues;
+                }
+
+                if (!groups.has(matchKey)) {
+                    groups.set(matchKey, {
+                        displayValue: groupValue,
+                        records: []
+                    });
+                }
+                
+                groups.get(matchKey).records.push(row);
+            });
+
+            let results = [];
+            let groupSummaries = [];
+
+            groups.forEach((groupData, key) => {
+                if (groupData.records.length >= minGroupSize) {
+                    groupSummaries.push({
+                        value: groupData.displayValue,
+                        count: groupData.records.length,
+                        records: groupData.records
+                    });
+                }
+            });
+
+            if (sortByGroupSize) {
+                groupSummaries.sort((a, b) => b.count - a.count);
+            } else {
+                groupSummaries.sort((a, b) => a.value.localeCompare(b.value));
+            }
+
+            groupSummaries.forEach(group => {
+                group.records.forEach(record => {
+                    const resultRow = { __group: group.value, __group_count: group.count };
+                    
+                    resultRow[groupByColumn] = record[groupByColumn];
+                    
+                    relatedColumns.forEach(col => {
+                        if (record.hasOwnProperty(col)) {
+                            resultRow[col] = record[col];
+                        }
+                    });
+                    
+                    if (queryType === 'related_records') {
+                        additionalMatchColumns.forEach(col => {
+                            if (record.hasOwnProperty(col)) {
+                                resultRow[col] = record[col];
+                            }
+                        });
+                    }
+                    
+                    resultRow.__source = record.__source;
+                    results.push(resultRow);
+                });
+            });
+
+            comparisonResults = results;
+            displayCrossReferenceResults(queryType, groupByColumn, relatedColumns, 
+                groupSummaries, minGroupSize, showGroupSummary);
+        }
+
+        function performSegmentation() {
+            const customerIdCol = document.getElementById('customerIdColumn').value;
+            const orderValueCol = document.getElementById('orderValueColumn').value;
+            const orderDateCol = document.getElementById('orderDateColumn').value;
+            const productCol = document.getElementById('productColumn').value;
+
+            // Product-based segmentation options
+            const enableProductSegmentation = document.getElementById('enableProductSegmentation').checked;
+            const productMatchType = document.getElementById('productMatchType').value;
+            const productTitlesText = document.getElementById('productTitles').value;
+            const productTitles = productTitlesText.split('\n')
+                .map(p => p.trim())
+                .filter(p => p.length > 0);
+
+            // Validation: Check if we have minimum required fields
+            if (enableProductSegmentation && productTitles.length > 0) {
+                // For product-based segmentation, we need at least Customer ID and Product Column
+                if (!customerIdCol) {
+                    alert('Please select a Customer ID column for product-based segmentation.');
+                    return;
+                }
+                if (!productCol) {
+                    alert('Please select a Product Column to enable product-based segmentation.');
+                    return;
+                }
+            } else {
+                // For behavior-based segmentation, we need all three core columns
+                if (!customerIdCol || !orderValueCol || !orderDateCol) {
+                    alert('Please select Customer ID, Order Value, and Order Date columns for behavior-based segmentation.');
+                    return;
+                }
+            }
+
+            const highValueThreshold = parseFloat(document.getElementById('highValueThreshold').value) || 1000;
+            const frequentBuyerThreshold = parseInt(document.getElementById('frequentBuyerThreshold').value) || 5;
+            const newCustomerDays = parseInt(document.getElementById('newCustomerDays').value) || 90;
+            const atRiskDays = parseInt(document.getElementById('atRiskDays').value) || 180;
+
+            // Aggregate customer data
+            const customers = new Map();
+            const today = new Date();
+
+            parsedData.forEach(fileData => {
+                fileData.rows.forEach(row => {
+                    const customerId = (row[customerIdCol] || '').toString().trim();
+                    if (!customerId) return;
+
+                    const orderValue = orderValueCol ? (parseFloat(row[orderValueCol]) || 0) : 0;
+                    const orderDate = orderDateCol ? parseDate(row[orderDateCol]) : null;
+                    const product = productCol ? (row[productCol] || '').toString().trim() : '';
+
+                    if (!customers.has(customerId)) {
+                        customers.set(customerId, {
+                            id: customerId,
+                            totalSpent: 0,
+                            orderCount: 0,
+                            products: new Set(),
+                            productsPurchased: [], // Store all products with details
+                            firstOrderDate: null,
+                            lastOrderDate: null,
+                            orders: []
+                        });
+                    }
+
+                    const customer = customers.get(customerId);
+                    customer.totalSpent += orderValue;
+                    customer.orderCount += 1;
+                    if (product) {
+                        customer.products.add(product);
+                        customer.productsPurchased.push(product);
+                    }
+                    
+                    if (orderDate) {
+                        if (!customer.firstOrderDate || orderDate < customer.firstOrderDate) {
+                            customer.firstOrderDate = orderDate;
+                        }
+                        if (!customer.lastOrderDate || orderDate > customer.lastOrderDate) {
+                            customer.lastOrderDate = orderDate;
+                        }
+                    }
+
+                    customer.orders.push({
+                        date: orderDate,
+                        value: orderValue,
+                        product: product
+                    });
+                });
+            });
+
+            // Create segments
+            let segments;
+            
+            if (enableProductSegmentation && productTitles.length > 0 && productCol) {
+                // Product-based segmentation
+                segments = createProductBasedSegments(customers, productTitles, productMatchType);
+            } else {
+                // Standard behavior-based segmentation
+                segments = createBehaviorBasedSegments(customers, {
+                    highValueThreshold,
+                    frequentBuyerThreshold,
+                    newCustomerDays,
+                    atRiskDays,
+                    today
+                });
+            }
+
+            displaySegmentationResults(segments, {
+                totalCustomers: customers.size,
+                highValueThreshold,
+                frequentBuyerThreshold,
+                newCustomerDays,
+                atRiskDays,
+                productBased: enableProductSegmentation && productTitles.length > 0,
+                productTitles: productTitles
+            });
+        }
+
+        function createProductBasedSegments(customers, productTitles, matchType) {
+            const segments = {};
+            
+            // Create a segment for each product title
+            productTitles.forEach((productTitle, index) => {
+                const segmentKey = `product_${index}`;
+                segments[segmentKey] = {
+                    name: productTitle,
+                    customers: [],
+                    color: getSegmentColor(index)
+                };
+            });
+
+            // Add a segment for customers who didn't buy any of the specified products
+            segments.no_match = {
+                name: 'Other Products',
+                customers: [],
+                color: '#e9ecef'
+            };
+
+            // Categorize customers
+            customers.forEach(customer => {
+                // Add computed metrics
+                const today = new Date();
+                const daysSinceFirst = customer.firstOrderDate ? 
+                    Math.floor((today - customer.firstOrderDate) / (1000 * 60 * 60 * 24)) : 0;
+                const daysSinceLast = customer.lastOrderDate ? 
+                    Math.floor((today - customer.lastOrderDate) / (1000 * 60 * 60 * 24)) : 0;
+
+                customer.daysSinceFirst = daysSinceFirst;
+                customer.daysSinceLast = daysSinceLast;
+                customer.avgOrderValue = customer.orderCount > 0 ? customer.totalSpent / customer.orderCount : 0;
+
+                let matched = false;
+
+                // Check each product title
+                productTitles.forEach((productTitle, index) => {
+                    const segmentKey = `product_${index}`;
+                    
+                    // Check if customer purchased this product
+                    const hasPurchased = customer.productsPurchased.some(product => {
+                        const productLower = product.toLowerCase();
+                        const titleLower = productTitle.toLowerCase();
+                        
+                        if (matchType === 'exact') {
+                            return productLower === titleLower;
+                        } else if (matchType === 'starts_with') {
+                            return productLower.startsWith(titleLower);
+                        } else { // contains
+                            return productLower.includes(titleLower);
+                        }
+                    });
+
+                    if (hasPurchased) {
+                        segments[segmentKey].customers.push(customer);
+                        matched = true;
+                    }
+                });
+
+                // If customer didn't match any product, add to "Other Products"
+                if (!matched) {
+                    segments.no_match.customers.push(customer);
+                }
+            });
+
+            return segments;
+        }
+
+        function createBehaviorBasedSegments(customers, config) {
+            const segments = {
+                vip: { name: 'VIP Customers', customers: [], color: '#FFD700' },
+                highValue: { name: 'High-Value Customers', customers: [], color: '#667eea' },
+                frequent: { name: 'Frequent Buyers', customers: [], color: '#28a745' },
+                newCustomers: { name: 'New Customers', customers: [], color: '#17a2b8' },
+                atRisk: { name: 'At-Risk Customers', customers: [], color: '#ffc107' },
+                oneTime: { name: 'One-Time Buyers', customers: [], color: '#6c757d' },
+                other: { name: 'Other Customers', customers: [], color: '#e9ecef' }
+            };
+
+            customers.forEach(customer => {
+                const daysSinceFirst = customer.firstOrderDate ? 
+                    Math.floor((config.today - customer.firstOrderDate) / (1000 * 60 * 60 * 24)) : 0;
+                const daysSinceLast = customer.lastOrderDate ? 
+                    Math.floor((config.today - customer.lastOrderDate) / (1000 * 60 * 60 * 24)) : 0;
+
+                customer.daysSinceFirst = daysSinceFirst;
+                customer.daysSinceLast = daysSinceLast;
+                customer.avgOrderValue = customer.orderCount > 0 ? customer.totalSpent / customer.orderCount : 0;
+
+                // Segment logic (priority order)
+                if (customer.totalSpent >= config.highValueThreshold && customer.orderCount >= config.frequentBuyerThreshold) {
+                    segments.vip.customers.push(customer);
+                } else if (customer.totalSpent >= config.highValueThreshold) {
+                    segments.highValue.customers.push(customer);
+                } else if (customer.orderCount >= config.frequentBuyerThreshold) {
+                    segments.frequent.customers.push(customer);
+                } else if (daysSinceFirst <= config.newCustomerDays) {
+                    segments.newCustomers.customers.push(customer);
+                } else if (daysSinceLast >= config.atRiskDays && customer.orderCount > 1) {
+                    segments.atRisk.customers.push(customer);
+                } else if (customer.orderCount === 1) {
+                    segments.oneTime.customers.push(customer);
+                } else {
+                    segments.other.customers.push(customer);
+                }
+            });
+
+            return segments;
+        }
+
+        function getSegmentColor(index) {
+            const colors = [
+                '#667eea', '#764ba2', '#28a745', '#17a2b8', '#ffc107', 
+                '#dc3545', '#6610f2', '#fd7e14', '#20c997', '#e83e8c',
+                '#6f42c1', '#007bff', '#6c757d', '#343a40', '#f8f9fa'
+            ];
+            return colors[index % colors.length];
+        }
+
+        function parseDate(dateString) {
+            if (!dateString) return null;
+            
+            const str = dateString.toString().trim();
+            
+            // Try various date formats
+            const formats = [
+                /^(\d{4})-(\d{2})-(\d{2})/, // YYYY-MM-DD
+                /^(\d{2})\/(\d{2})\/(\d{4})/, // MM/DD/YYYY
+                /^(\d{2})-(\d{2})-(\d{4})/, // MM-DD-YYYY
+                /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/, // M/D/YY or M/D/YYYY
+            ];
+
+            for (let format of formats) {
+                const match = str.match(format);
+                if (match) {
+                    let year, month, day;
+                    if (format.source.startsWith('^(\\d{4})')) {
+                        // YYYY-MM-DD
+                        [, year, month, day] = match;
+                    } else {
+                        // MM/DD/YYYY or similar
+                        [, month, day, year] = match;
+                        if (year.length === 2) {
+                            year = year < 50 ? '20' + year : '19' + year;
+                        }
+                    }
+                    return new Date(year, month - 1, day);
+                }
+            }
+
+            // Try default Date parsing
+            const date = new Date(str);
+            return isNaN(date.getTime()) ? null : date;
+        }
+
+        function displayResults(comparisonType, matchColumn) {
+            const typeLabels = {
+                'in_both': 'Records in Both Files',
+                'in_first_only': 'Records Only in First File',
+                'in_second_only': 'Records Only in Second File',
+                'all_with_match': 'All Records with Match Status'
+            };
+
+            const downloadButtons = `
+                <div class="export-buttons" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportResults()">💾 Download Results as CSV</button>
+                    <button class="btn btn-secondary" onclick="resetTool()">🔄 Start Over</button>
+                </div>
+            `;
+
+            const summary = `
+                <h3>Comparison Results</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number">${comparisonResults.length.toLocaleString()}</div>
+                        <div class="summary-label">Total Results</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">${parsedData.length}</div>
+                        <div class="summary-label">Files Compared</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>Comparison Type:</strong> ${typeLabels[comparisonType]}<br>
+                    <strong>Match Column:</strong> ${matchColumn}
+                </div>
+            `;
+
+            let tableHTML = '';
+            if (comparisonResults.length > 0) {
+                const allHeaders = new Set(['__source']);
+                if (comparisonType === 'all_with_match') {
+                    allHeaders.add('__match_status');
+                }
+                comparisonResults.forEach(row => {
+                    Object.keys(row).forEach(key => {
+                        if (!key.startsWith('__') || key === '__match_status') {
+                            allHeaders.add(key);
+                        }
+                    });
+                });
+
+                const headers = Array.from(allHeaders);
+                tableHTML = '<div class="results-table"><table><thead><tr>';
+                headers.forEach(header => {
+                    const displayHeader = header === '__source' ? 'Source File' : 
+                                        header === '__match_status' ? 'Match Status' : header;
+                    tableHTML += `<th>${displayHeader}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+
+                comparisonResults.slice(0, 1000).forEach(row => {
+                    tableHTML += '<tr>';
+                    headers.forEach(header => {
+                        const value = row[header] || '';
+                        tableHTML += `<td>${escapeHtml(value)}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+
+                if (comparisonResults.length > 1000) {
+                    tableHTML += `<tr><td colspan="${headers.length}" style="text-align: center; padding: 20px; background: #fff3cd; color: #856404;">Showing first 1,000 results of ${comparisonResults.length.toLocaleString()}. Download CSV to see all results.</td></tr>`;
+                }
+
+                tableHTML += '</tbody></table></div>';
+            } else {
+                tableHTML = '<div class="results-table"><div style="padding: 40px; text-align: center; color: #6c757d;"><h3>No results found</h3><p>No records matched your criteria.</p></div></div>';
+            }
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('hidden');
+            resultsSection.innerHTML = `
+                <div class="section-title">📈 Results</div>
+                ${downloadButtons}
+                <div class="results-summary">${summary}</div>
+                ${tableHTML}
+            `;
+        }
+
+        function displayExtractionResults(filterColumn, filterType, filterValue) {
+            const downloadButtons = `
+                <div class="export-buttons" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportResults()">💾 Download Results as CSV</button>
+                    <button class="btn btn-secondary" onclick="resetTool()">🔄 Start Over</button>
+                </div>
+            `;
+
+            const typeLabels = {
+                'contains': 'Contains',
+                'equals': 'Equals',
+                'starts_with': 'Starts With',
+                'ends_with': 'Ends With',
+                'not_contains': 'Does Not Contain',
+                'not_equals': 'Does Not Equal'
+            };
+
+            const summary = `
+                <h3>Extraction Results</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number">${comparisonResults.length.toLocaleString()}</div>
+                        <div class="summary-label">Records Found</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>Filter Column:</strong> ${filterColumn}<br>
+                    <strong>Filter Type:</strong> ${typeLabels[filterType]}<br>
+                    <strong>Filter Value:</strong> "${filterValue}"
+                </div>
+            `;
+
+            let tableHTML = '';
+            if (comparisonResults.length > 0) {
+                const allHeaders = new Set(['__source']);
+                comparisonResults.forEach(row => {
+                    Object.keys(row).forEach(key => {
+                        if (!key.startsWith('__')) {
+                            allHeaders.add(key);
+                        }
+                    });
+                });
+
+                const headers = Array.from(allHeaders);
+                tableHTML = '<div class="results-table"><table><thead><tr>';
+                headers.forEach(header => {
+                    const displayHeader = header === '__source' ? 'Source File' : header;
+                    tableHTML += `<th>${displayHeader}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+
+                comparisonResults.slice(0, 1000).forEach(row => {
+                    tableHTML += '<tr>';
+                    headers.forEach(header => {
+                        const value = row[header] || '';
+                        tableHTML += `<td>${escapeHtml(value)}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+
+                if (comparisonResults.length > 1000) {
+                    tableHTML += `<tr><td colspan="${headers.length}" style="text-align: center; padding: 20px; background: #fff3cd; color: #856404;">Showing first 1,000 results of ${comparisonResults.length.toLocaleString()}. Download CSV to see all results.</td></tr>`;
+                }
+
+                tableHTML += '</tbody></table></div>';
+            } else {
+                tableHTML = '<div class="results-table"><div style="padding: 40px; text-align: center; color: #6c757d;"><h3>No results found</h3><p>No records matched your filter criteria.</p></div></div>';
+            }
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('hidden');
+            resultsSection.innerHTML = `
+                <div class="section-title">📈 Results</div>
+                ${downloadButtons}
+                <div class="results-summary">${summary}</div>
+                ${tableHTML}
+            `;
+        }
+
+        function displayCrossReferenceResults(queryType, groupByColumn, relatedColumns, 
+            groupSummaries, minGroupSize, showGroupSummary) {
+            
+            const queryTypeLabels = {
+                'same_value': 'Records with Same Values',
+                'grouped_by': 'Grouped Records',
+                'duplicate_values': 'Duplicate Values',
+                'related_records': 'Related Records'
+            };
+
+            const downloadButtons = `
+                <div class="export-buttons" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportResults()">💾 Download Results as CSV</button>
+                    <button class="btn btn-secondary" onclick="resetTool()">🔄 Start Over</button>
+                </div>
+            `;
+
+            const summary = `
+                <h3>Cross-Reference Query Results</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number">${comparisonResults.length.toLocaleString()}</div>
+                        <div class="summary-label">Total Records</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">${groupSummaries.length.toLocaleString()}</div>
+                        <div class="summary-label">Groups Found</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">${groupSummaries.length > 0 ? Math.max(...groupSummaries.map(g => g.count)) : 0}</div>
+                        <div class="summary-label">Largest Group</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>Query:</strong> ${queryTypeLabels[queryType]} by "${groupByColumn}"<br>
+                    <strong>Showing:</strong> ${relatedColumns.join(', ')}<br>
+                    <strong>Min Group Size:</strong> ${minGroupSize}
+                </div>
+            `;
+
+            let tableHTML = '';
+
+            if (showGroupSummary && groupSummaries.length > 0) {
+                groupSummaries.forEach(group => {
+                    const groupRecords = comparisonResults.filter(r => r.__group === group.value);
+                    
+                    tableHTML += `
+                        <div class="group-header">
+                            <div class="group-title">${groupByColumn}: ${escapeHtml(group.value)}</div>
+                            <div class="group-count">${group.count} record${group.count > 1 ? 's' : ''}</div>
+                        </div>
+                    `;
+
+                    const allHeaders = new Set(['__source']);
+                    groupRecords.forEach(row => {
+                        Object.keys(row).forEach(key => {
+                            if (!key.startsWith('__')) {
+                                allHeaders.add(key);
+                            }
+                        });
+                    });
+                    const headers = Array.from(allHeaders);
+
+                    tableHTML += '<div class="results-table"><table><thead><tr>';
+                    headers.forEach(header => {
+                        const displayHeader = header === '__source' ? 'Source File' : header;
+                        tableHTML += `<th>${displayHeader}</th>`;
+                    });
+                    tableHTML += '</tr></thead><tbody>';
+
+                    groupRecords.forEach(row => {
+                        tableHTML += '<tr>';
+                        headers.forEach(header => {
+                            const value = row[header] || '';
+                            tableHTML += `<td>${escapeHtml(value)}</td>`;
+                        });
+                        tableHTML += '</tr>';
+                    });
+
+                    tableHTML += '</tbody></table></div>';
+                });
+            } else if (comparisonResults.length > 0) {
+                const allHeaders = new Set(['__group', '__group_count', '__source']);
+                comparisonResults.forEach(row => {
+                    Object.keys(row).forEach(key => {
+                        if (!key.startsWith('__') || key === '__group' || key === '__group_count') {
+                            allHeaders.add(key);
+                        }
+                    });
+                });
+                const headers = Array.from(allHeaders).filter(h => !h.startsWith('__') || h === '__group' || h === '__group_count');
+
+                tableHTML = '<div class="results-table"><table><thead><tr>';
+                headers.forEach(header => {
+                    let displayHeader = header;
+                    if (header === '__source') displayHeader = 'Source File';
+                    else if (header === '__group') displayHeader = `${groupByColumn} (Group)`;
+                    else if (header === '__group_count') displayHeader = 'Group Count';
+                    tableHTML += `<th>${displayHeader}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+
+                comparisonResults.slice(0, 1000).forEach(row => {
+                    tableHTML += '<tr>';
+                    headers.forEach(header => {
+                        const value = row[header] || '';
+                        tableHTML += `<td>${escapeHtml(value)}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+
+                if (comparisonResults.length > 1000) {
+                    tableHTML += `<tr><td colspan="${headers.length}" style="text-align: center; padding: 20px; background: #fff3cd; color: #856404;">Showing first 1,000 results of ${comparisonResults.length.toLocaleString()}. Download CSV to see all results.</td></tr>`;
+                }
+
+                tableHTML += '</tbody></table></div>';
+            } else {
+                tableHTML = '<div class="results-table"><div style="padding: 40px; text-align: center; color: #6c757d;"><h3>No results found</h3><p>No groups met your criteria.</p></div></div>';
+            }
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('hidden');
+            resultsSection.innerHTML = `
+                <div class="section-title">📈 Results</div>
+                ${downloadButtons}
+                <div class="results-summary">${summary}</div>
+                ${tableHTML}
+            `;
+        }
+
+        function displaySegmentationResults(segments, config) {
+            const downloadButtons = `
+                <div class="export-buttons" style="margin-bottom: 20px;">
+                    <button class="btn btn-success" onclick="exportSegmentationResults()">💾 Download Segment Analysis</button>
+                    <button class="btn btn-success" onclick="exportCustomerDetails()">💾 Download Customer Details</button>
+                    <button class="btn btn-secondary" onclick="resetTool()">🔄 Start Over</button>
+                </div>
+            `;
+
+            const totalCustomers = config.totalCustomers;
+            const totalRevenue = Array.from(Object.values(segments))
+                .flatMap(seg => seg.customers)
+                .reduce((sum, c) => sum + c.totalSpent, 0);
+
+            const segmentationType = config.productBased ? 'Product-Based' : 'Behavior-Based';
+            const productInfo = config.productBased ? 
+                `<br><strong>Products:</strong> ${config.productTitles.join(', ')}` : '';
+
+            const summary = `
+                <h3>Customer Segmentation Analysis</h3>
+                <div class="summary-grid">
+                    <div class="summary-item">
+                        <div class="summary-number">${totalCustomers.toLocaleString()}</div>
+                        <div class="summary-label">Total Customers</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                        <div class="summary-label">Total Revenue</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-number">${Object.keys(segments).length}</div>
+                        <div class="summary-label">Segments Identified</div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                    <strong>Segmentation Type:</strong> ${segmentationType}${productInfo}
+                </div>
+            `;
+
+            let segmentsHTML = '';
+            Object.entries(segments).forEach(([key, segment]) => {
+                if (segment.customers.length === 0) return;
+
+                const segmentRevenue = segment.customers.reduce((sum, c) => sum + c.totalSpent, 0);
+                const avgSpent = segmentRevenue / segment.customers.length;
+                const avgOrders = segment.customers.reduce((sum, c) => sum + c.orderCount, 0) / segment.customers.length;
+
+                segmentsHTML += `
+                    <div class="segment-card" style="border-left-color: ${segment.color};">
+                        <div class="segment-header">
+                            <div class="segment-name">${segment.name}</div>
+                            <div class="segment-count">${segment.customers.length} customers (${((segment.customers.length / totalCustomers) * 100).toFixed(1)}%)</div>
+                        </div>
+                        <div class="segment-stats">
+                            <div class="segment-stat">
+                                <div class="segment-stat-label">Total Revenue</div>
+                                <div class="segment-stat-value">$${segmentRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            </div>
+                            <div class="segment-stat">
+                                <div class="segment-stat-label">Avg. Customer Value</div>
+                                <div class="segment-stat-value">$${avgSpent.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+                            </div>
+                            <div class="segment-stat">
+                                <div class="segment-stat-label">Avg. Orders</div>
+                                <div class="segment-stat-value">${avgOrders.toFixed(1)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.classList.remove('hidden');
+            resultsSection.innerHTML = `
+                <div class="section-title">📈 Segmentation Results</div>
+                ${downloadButtons}
+                <div class="results-summary">${summary}</div>
+                ${segmentsHTML}
+            `;
+
+            // Store segments globally for export
+            window.segmentationData = { segments, config };
+        }
+
+        function exportSegmentationResults() {
+            if (!window.segmentationData) return;
+
+            const { segments } = window.segmentationData;
+            let csv = 'Segment,Customer Count,Total Revenue,Avg Customer Value,Avg Orders,Revenue %\n';
+
+            const totalRevenue = Object.values(segments)
+                .flatMap(seg => seg.customers)
+                .reduce((sum, c) => sum + c.totalSpent, 0);
+
+            Object.entries(segments).forEach(([key, segment]) => {
+                if (segment.customers.length === 0) return;
+
+                const segmentRevenue = segment.customers.reduce((sum, c) => sum + c.totalSpent, 0);
+                const avgSpent = segmentRevenue / segment.customers.length;
+                const avgOrders = segment.customers.reduce((sum, c) => sum + c.orderCount, 0) / segment.customers.length;
+                const revenuePercent = (segmentRevenue / totalRevenue * 100).toFixed(1);
+
+                csv += `"${segment.name}",${segment.customers.length},${segmentRevenue.toFixed(2)},${avgSpent.toFixed(2)},${avgOrders.toFixed(1)},${revenuePercent}%\n`;
+            });
+
+            downloadCSV(csv, 'customer_segments_summary.csv');
+        }
+
+        function exportCustomerDetails() {
+            if (!window.segmentationData) return;
+
+            const { segments } = window.segmentationData;
+            let csv = 'Customer ID,Segment,Total Spent,Order Count,Avg Order Value,First Order Date,Last Order Date,Days Since First Order,Days Since Last Order,Product Count\n';
+
+            Object.entries(segments).forEach(([key, segment]) => {
+                segment.customers.forEach(customer => {
+                    const firstDate = customer.firstOrderDate ? customer.firstOrderDate.toISOString().split('T')[0] : '';
+                    const lastDate = customer.lastOrderDate ? customer.lastOrderDate.toISOString().split('T')[0] : '';
+                    
+                    csv += `"${customer.id}","${segment.name}",${customer.totalSpent.toFixed(2)},${customer.orderCount},${customer.avgOrderValue.toFixed(2)},"${firstDate}","${lastDate}",${customer.daysSinceFirst},${customer.daysSinceLast},${customer.products.size}\n`;
+                });
+            });
+
+            downloadCSV(csv, 'customer_details.csv');
+        }
+
+        function exportResults() {
+            if (comparisonResults.length === 0) {
+                alert('No results to export.');
+                return;
+            }
+
+            const allHeaders = new Set();
+            comparisonResults.forEach(row => {
+                Object.keys(row).forEach(key => allHeaders.add(key));
+            });
+
+            const headers = Array.from(allHeaders);
+            let csv = headers.map(h => `"${h}"`).join(',') + '\n';
+
+            comparisonResults.forEach(row => {
+                const values = headers.map(header => {
+                    const value = row[header] || '';
+                    return `"${value.toString().replace(/"/g, '""')}"`;
+                });
+                csv += values.join(',') + '\n';
+            });
+
+            downloadCSV(csv, 'comparison_results.csv');
+        }
+
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function resetTool() {
+            if (confirm('This will clear all uploaded files and results. Continue?')) {
+                uploadedFiles = [];
+                parsedData = [];
+                comparisonResults = [];
+                headerMappings = {};
+                fileList.innerHTML = '';
+                document.getElementById('modeSection').classList.add('hidden');
+                document.getElementById('optionsSection').classList.add('hidden');
+                document.getElementById('extractionSection').classList.add('hidden');
+                document.getElementById('crossrefSection').classList.add('hidden');
+                document.getElementById('segmentationSection').classList.add('hidden');
+                document.getElementById('resultsSection').classList.add('hidden');
+                fileInput.value = '';
+                currentMode = null;
+                window.segmentationData = null;
+            }
+        }
+    </script>
+</body>
+</html>
